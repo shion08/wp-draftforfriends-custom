@@ -135,13 +135,11 @@ class WPDraftsForFriends {
 
             // *## adding custom scripts to use select2
             $admin_js_custom_url = 'js/draftsforfriends-admin-custom.js';
-            wp_enqueue_script( 'draftsforfriends-admin', plugins_url( $admin_js_custom_url, __FILE__ ), array( 'jquery' ), WP_DRAFTSFORFRIENDS_VERSION, true );
-
+            wp_enqueue_script( 'draftsforfriends-admin-custom', plugins_url( $admin_js_custom_url, __FILE__ ), array( 'jquery' ), WP_DRAFTSFORFRIENDS_VERSION, true );
             
             // Minified CSS/CSS URLs
             $admin_css_url = 'css/draftsforfriends-admin.min.css';
             $admin_js_url = 'js/draftsforfriends-admin.min.js';
-
 
             // If WP_DEBUG mode we load non-minified URLs
             if( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -171,7 +169,9 @@ class WPDraftsForFriends {
      * @return void
      */
     public function add_admin_pages() {
-        add_submenu_page( 'edit.php', __( 'Drafts for Friends', 'wp-draftsforfriends' ), __( 'Drafts for Friends', 'wp-draftsforfriends' ), 'publish_posts', __FILE__, array( $this, 'output_existing_menu_sub_admin_page' ) );
+        // add_submenu_page( 'edit.php', __( 'Drafts for Friends', 'wp-draftsforfriends' ), __( 'Drafts for Friends', 'wp-draftsforfriends' ), 'publish_posts', __FILE__, array( $this, 'output_existing_menu_sub_admin_page' ) );
+        // add_submenu_page( 'edit.php', __( 'Links for Drafts', 'wp-draftsforfriends' ), __( 'Links for Drafts', 'wp-draftsforfriends' ), 'publish_posts', __FILE__, array( $this, 'output_existing_menu_sub_admin_page' ) );
+        add_menu_page( __( 'Draft Public Links', 'wp-draftsforfriends' ), __( 'Draft Public Links', 'wp-draftsforfriends' ), 'publish_posts',  __FILE__, array( $this, 'output_existing_menu_sub_admin_page' ), 'dashicons-welcome-widgets-menus', 6 );
     }
 
     /**
@@ -653,10 +653,15 @@ class WPDraftsForFriends {
         $text_sortorder = __( 'Descending', 'wp-draftsforfriends' );
         if( 'asc' == $dff_params['sortorder'] )
             $text_sortorder = __( 'Ascending', 'wp-draftsforfriends' );
+
+        // *## calling scripts needed
+        $this->admin_scripts('posts_page_wp-draftsforfriends/wp-draftsforfriends');
+ 
+
 ?>
     <div class="wrap">
         <div id="icon-draftsforfriends" class="icon32"><br /></div>
-        <h2><?php _e( 'Drafts for Friends', 'wp-draftsforfriends' ); ?></h2>
+        <h2><?php _e( 'Draft Public Links', 'wp-draftsforfriends' ); ?></h2>
         <?php if ( ! empty( $output['success'] ) ): ?>
             <div id="draftsforfriends-message" class="updated fade success"><?php echo $output['success']; ?></div>
         <?php elseif ( ! empty( $output['error'] ) ): ?>
@@ -665,8 +670,8 @@ class WPDraftsForFriends {
             <div id="draftsforfriends-message" class="updated" style="display: none;"></div>
         <?php endif; ?>
         <?php if ( !empty( $ds[0][2] ) || !empty( $ds[1][2] ) || !empty( $ds[2][2] ) ): ?>
-            <h3><?php _e( 'Share Draft with Friends', 'wp-draftsforfriends' ); ?></h3>
-            <form id="draftsforfriends-add" action="<?php echo admin_url( 'edit.php?page='.plugin_basename( __FILE__ ) ); ?>" method="post" onsubmit="return false;">
+            <h3><?php _e( 'Create Public Links for Drafts', 'wp-draftsforfriends' ); ?></h3>
+            <form id="draftsforfriends-add" action="<?php echo admin_url( 'admin.php?page='.plugin_basename( __FILE__ ) ); ?>" method="post" onsubmit="return false;">
                 <?php wp_nonce_field( 'draftsforfriends-add', 'draftsforfriends-add-nonce' ); ?>
                 <table class="widefat">
                     <tbody>
@@ -675,7 +680,7 @@ class WPDraftsForFriends {
                             <?php _e( 'Choose a draft:', 'wp-draftsforfriends' ); ?>
                         </th>
                         <td >
-                            <select name="post_id" class="select2-posts" style="width: 600px;">
+                            <select name="post_id" class="select2-posts" style="width: 700px;">
                                 <?php foreach ( $ds as $dt ): ?>
                                     <?php if ( $dt[1] ): ?>
                                         <option value="" selected="selected" disabled="disabled"></option>
@@ -832,7 +837,7 @@ class WPDraftsForFriends {
                         </a>
                     </span>
                 </div>
-                <form class="draftsforfriends-extend-form expanded" action="<?php echo admin_url( 'edit.php?page=' . plugin_basename(__FILE__) ); ?>" method="post" onsubmit="return false;">
+                <form class="draftsforfriends-extend-form expanded" action="<?php echo admin_url( 'admin.php?page=' . plugin_basename(__FILE__) ); ?>" method="post" onsubmit="return false;">
                     <?php wp_nonce_field( $extend_nonce_key, $extend_nonce_key . '-nonce' ); ?>
                     <input type="hidden" name="id" value="<?php echo $shared_draft->id; ?>" />
                     <input type="hidden" name="post_id" value="<?php echo $shared_draft->post_id; ?>" />
@@ -856,7 +861,7 @@ class WPDraftsForFriends {
                                 '_wpnonce' => $delete_nonce
                             )
                         ?>
-                        <a href="<?php echo admin_url( 'edit.php?' . http_build_query( $query_params ) ); ?>" title="<?php _e( 'Delete', 'wp-draftsforfriends' ); ?>"><?php _e( 'Delete', 'wp-draftsforfriends' ); ?></a>
+                        <a href="<?php echo admin_url( 'admin.php?' . http_build_query( $query_params ) ); ?>" title="<?php _e( 'Delete', 'wp-draftsforfriends' ); ?>"><?php _e( 'Delete', 'wp-draftsforfriends' ); ?></a>
                     </span>
                 </form>
             </td>
@@ -954,7 +959,7 @@ class WPDraftsForFriends {
             'dff_sortby'    => $dff_params['sortby'],
             'dff_sortorder' => $dff_params['sortorder']
         );
-        return admin_url( 'edit.php?' . http_build_query( $query_params ) );
+        return admin_url( 'admin.php?' . http_build_query( $query_params ) );
     }
 
 
